@@ -1,0 +1,10 @@
+.\objects\timer.o: D:\Deuce\MDK5\RealThread\RT-Thread\3.1.3\src\timer.c
+.\objects\timer.o: D:\Deuce\MDK5\RealThread\RT-Thread\3.1.3\include\rtthread.h
+.\objects\timer.o: .\HardWare\rtconfig.h
+.\objects\timer.o: D:\Deuce\MDK5\RealThread\RT-Thread\3.1.3\include\rtdebug.h
+.\objects\timer.o: D:\Deuce\MDK5\RealThread\RT-Thread\3.1.3\include\rtdef.h
+.\objects\timer.o: D:\Deuce\MDK5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\objects\timer.o: D:\Deuce\MDK5\RealThread\RT-Thread\3.1.3\include\rtservice.h
+.\objects\timer.o: D:\Deuce\MDK5\RealThread\RT-Thread\3.1.3\include\rtm.h
+.\objects\timer.o: D:\Deuce\MDK5\RealThread\RT-Thread\3.1.3\include\rtthread.h
+.\objects\timer.o: D:\Deuce\MDK5\RealThread\RT-Thread\3.1.3\include\rthw.h
