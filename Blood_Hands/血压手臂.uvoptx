@@ -148,24 +148,7 @@
           <Name>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F10x_128 -FS08000000 -FL020000 -FP0($$Device:STM32F103C8$Flash\STM32F10x_128.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>311</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134220410</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\HardWare\All_Duty_Dispose.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Blood_Hands\HardWare/All_Duty_Dispose.c\311</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -175,7 +158,7 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Read_ADC_From_E2</ItemText>
+          <ItemText>Read_ADC_From_E2,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
@@ -186,6 +169,16 @@
           <count>3</count>
           <WinNumber>1</WinNumber>
           <ItemText>Calibration</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Diff,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Nao_Pulse_Status</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

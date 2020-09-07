@@ -6,7 +6,7 @@ void Inquire_Pressure(void);
 void Pulse_BounceIndex(void);
 void Pulse_Bounce_OneShot(void);
 void Blood_Pressure_Calibration(void);
-void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao,uint8_t index);
+void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao);
 int Average_ADC(uint8_t Flag,int AD_VALUE);
 /***********************声明返回区*******************************/
 
@@ -14,18 +14,17 @@ extern CanRxMsg RxMessage;
 extern CanTxMsg TxMessage;	
 extern rt_event_t Blood_Pressure_Calibration_Event;
 /***********************全局变量区*******************************/
-double Get_AnalogValue;
 uint16_t ADC_ConvertedValue;
-uint8_t Hong_Pulse_Status=0xff;
+uint8_t Gong_Pulse_Status=0xff;
 uint8_t Nao_Pulse_Status=0xff;
 int Save_ADC_To_E2[7];
-int Read_ADC_From_E2[7]={0};
+int Read_ADC_From_E2[8]={0};
 float Calibration[7];
 int Value_mmHg[7]={0};
-int ADC_Value=0;
 uint8_t Read_From_E2_Flag=0;
+uint8_t Switch_Flag=0;
 
-const int  _0_mmHg   = 10;
+const int  _0_mmHg   = 0;
 const int  _50_mmHg  = 50;
 const int  _100_mmHg = 100;
 const int  _150_mmHg = 150;
@@ -42,7 +41,10 @@ const int  _300_mmHg = 300;
   ***************************************/
 void General_Dispose(void)
 {
-	Pulse_Bounce_Dispose(Hong_Pulse_Status,Nao_Pulse_Status,Is_LeftOrRight());//肱动脉处理
+	if(Switch_Flag == 1)
+	{
+		Pulse_Bounce_Dispose(Gong_Pulse_Status,Nao_Pulse_Status);//肱动脉处理
+	}
 }
  /****************************************
   * @brief  CAN接收处理函数
@@ -50,8 +52,7 @@ void General_Dispose(void)
   * @retval 无
   ***************************************/
 void CAN_Task_Dispose(void)
-{
-//			printf("收到了=%x\n",RxMessage.StdId);		
+{	
 			switch(RxMessage.Data[0])
 			{
 				case 0xc1:
@@ -91,21 +92,22 @@ void Inquire_Pressure(void)
   ***************************************/
 void Pulse_BounceIndex(void)
 {
+	Switch_Flag = 1;
 	switch(RxMessage.Data[1])
 	{
 		case 0x00:
-							Hong_Pulse_Status = GONG_DISAPPEAR;
+							Gong_Pulse_Status = GONG_DISAPPEAR;
 							break;
 		case 0x01:
-							Hong_Pulse_Status = GONG_NORMAL;
+							Gong_Pulse_Status = GONG_NORMAL;
 							break;
 		case 0x02:
-							Hong_Pulse_Status = GONG_UP;
+							Gong_Pulse_Status = GONG_UP;
 							break;
 		case 0x03:
-							Hong_Pulse_Status = GONG_DOWN;
+							Gong_Pulse_Status = GONG_DOWN;
 							break;
-		default:	Hong_Pulse_Status = 0xff;
+		default:	Gong_Pulse_Status = 0xff;
 							break;	
 	}
 	switch(RxMessage.Data[2])
@@ -131,7 +133,7 @@ void Pulse_BounceIndex(void)
   * @param  无
   * @retval 无
   ***************************************/
-void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao,uint8_t index)
+void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao)
 {
 	switch(Current_Status_Gong)
 	{
@@ -150,8 +152,6 @@ void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao
 		case GONG_DOWN:
 											//肱脉搏减弱
 											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_DOWN,DELAY_TIES);
-											break;
-		default : Current_Status_Gong = 0xff;
 											break;
 	}
 	switch(Current_Status_Nao)
@@ -172,8 +172,6 @@ void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao
 											//挠脉搏减弱
 											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_DOWN,DELAY_TIES);
 											break;
-		default:	Current_Status_Nao = 0xff;
-						  break;
 	}
 }
  /****************************************
@@ -183,13 +181,36 @@ void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao
   ****************************************/
 void Pulse_Bounce_OneShot(void)
 {
-	if(Is_LeftOrRight() == Blood_LEFT)
+	Switch_Flag = 0;
+	switch(Gong_Pulse_Status)
 	{
-		rt_kprintf("左脉搏跳一下\n");
+		case GONG_DISAPPEAR:
+											//肱脉搏单跳消失
+											GPIOB->BSRR = GPIO_Pin_10;
+											break;
+		case GONG_UP:	
+		case GONG_DOWN:	
+		case GONG_NORMAL:
+											//肱脉搏单跳正常
+											GPIOB->BRR = GPIO_Pin_10;	
+											rt_thread_delay(1000);
+											GPIOB->BSRR = GPIO_Pin_10;
+											break;
 	}
-	else
+	switch(Nao_Pulse_Status)
 	{
-		rt_kprintf("右脉搏跳一下\n");
+		case NAO_DISAPPEAR:
+											//挠脉搏单跳消失
+											GPIOB->BSRR = GPIO_Pin_11;
+											break;
+		case NAO_UP:
+		case NAO_DOWN:
+		case NAO_NORMAL:
+											//挠脉搏单跳正常
+											GPIOB->BRR = GPIO_Pin_11;	
+											rt_thread_delay(1000);
+											GPIOB->BSRR = GPIO_Pin_11;
+											break;
 	}
 }
  /****************************************
@@ -207,7 +228,7 @@ void Blood_Pressure_Calibration(void)
 									ee_WriteBytes((uint8_t *)&_0_mmHg,0x14,2);
 									Save_ADC_To_E2[0]	= Average_ADC(0,ADC_ConvertedValue);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[0],0,2);
-									TxMessage.Data[1] = Zero_mmhg;
+									TxMessage.Data[2] = Zero_mmhg;
 									rt_kprintf("Zero_mmhgn\n");
 									break;
 		case Fifty_mmhg:
@@ -216,7 +237,7 @@ void Blood_Pressure_Calibration(void)
 									Save_ADC_To_E2[1]	= Average_ADC(0,ADC_ConvertedValue);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[1],2,2);
 									rt_kprintf("Fifty_mmhg\n");
-									TxMessage.Data[1] = Fifty_mmhg;
+									TxMessage.Data[2] = Fifty_mmhg;
 									break;
 		case One_Hundred_mmhg:
 									//100mmhg
@@ -224,7 +245,7 @@ void Blood_Pressure_Calibration(void)
 									Save_ADC_To_E2[2]	= Average_ADC(0,ADC_ConvertedValue);
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[2],2*2,2);
 									rt_kprintf("One_Hundred_mmhg\n");
-									TxMessage.Data[1] = One_Hundred_mmhg;
+									TxMessage.Data[2] = One_Hundred_mmhg;
 									break;
 		case One_Hundred_Fifty_mmhg:
 									//150mmhg
@@ -232,34 +253,35 @@ void Blood_Pressure_Calibration(void)
 									Save_ADC_To_E2[3]	= Average_ADC(0,ADC_ConvertedValue);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[3],2*3,2);
 									rt_kprintf("One_Hundred_Fifty_mmhg\n");
-									TxMessage.Data[1] = One_Hundred_Fifty_mmhg;
+									TxMessage.Data[2] = One_Hundred_Fifty_mmhg;
 									break;
 		case Two_Hundred_mmhg:
 									//200mmhg
 									ee_WriteBytes((uint8_t *)&_200_mmHg,0x14+2*4,2);		
 									Save_ADC_To_E2[4]	= Average_ADC(0,ADC_ConvertedValue);
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[4],2*4,2);
-									TxMessage.Data[1] = Two_Hundred_mmhg;
+									TxMessage.Data[2] = Two_Hundred_mmhg;
 									break;
 		case Two_Hundred_Fifty_mmhg:
 									//250mmhg
 									ee_WriteBytes((uint8_t *)&_250_mmHg,0x14+2*5,2);	
 									Save_ADC_To_E2[5]	= Average_ADC(0,ADC_ConvertedValue);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[5],2*5,2);		
-									TxMessage.Data[1] = Two_Hundred_Fifty_mmhg;
+									TxMessage.Data[2] = Two_Hundred_Fifty_mmhg;
 									break;
 		case Three_Hundred_mmhg:
 									//300mmhg
 									ee_WriteBytes((uint8_t *)&_300_mmHg,0x14+2*6,2);		
 									Save_ADC_To_E2[6]	= Average_ADC(0,ADC_ConvertedValue);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[6],2*6,2);	
-									TxMessage.Data[1] = Three_Hundred_mmhg;
+									TxMessage.Data[2] = Three_Hundred_mmhg;
 									break;
 		default:
 									break;
 	}
 	Read_From_E2_Flag = 0;
 	TxMessage.Data[0] = 0xd1;
+	TxMessage.Data[1] = Is_LeftOrRight();
 	CAN_SetMsg(0x71,&TxMessage);
 	CAN_Transmit(CAN1,&TxMessage);
 	
@@ -271,21 +293,26 @@ void Blood_Pressure_Calibration(void)
   ****************************************/
 void ADC_DataToSend(void)
 {
-	static int data=0; 
+	static int data=0,data1=0;
 	int Current_Vlaue;
 	/* 读取数据，赋值一次*/
 	if(!Read_From_E2_Flag)
 	{	
+		/* 确保ommhG时ADC采集的值为0，相当于整体左移Read_ADC_From_E2[0]值的距离*/
+		rt_thread_delay(10);
 		for(int i=0;i<7;i++)
 		{
 			ee_ReadBytes((uint8_t *)&Read_ADC_From_E2[i],i*2,2);
-			rt_thread_delay(100);
+			rt_thread_delay(10);
 			ee_ReadBytes((uint8_t *)&Value_mmHg[i],0x14+i*2,2);
-			rt_thread_delay(100);
+			rt_thread_delay(10);	
+		}
+		for(int i=0;i<6;i++)
+		{
+			Calibration[i] = (float)(Value_mmHg[i+1] - Value_mmHg[i]) / (float)(Read_ADC_From_E2[i+1] - Read_ADC_From_E2[i]);
 		}
 		Read_From_E2_Flag = 1;
 	}
-	
 	//袖带位置，以此开启函数，未写
 	
 	ADC_SoftwareStartConvCmd(ADCx,ENABLE);
@@ -297,12 +324,16 @@ void ADC_DataToSend(void)
 	/* 开始校准数据*/
 	for(int i=0;i<6;i++)
 	{
-		Calibration[i+1] = (float)(Value_mmHg[i+1] - Value_mmHg[i]) / (float)(Read_ADC_From_E2[i+1] - Read_ADC_From_E2[i]);
+		/* 由于环境问题，总会出现初始值不为0的情况，以这种方式去平衡它*/
+		if(Current_Vlaue < 75)
+			{
+				data1 = (int)((float)Current_Vlaue * Calibration[0]);	
+			}
 		if((Current_Vlaue >= Read_ADC_From_E2[i]) && (Current_Vlaue < Read_ADC_From_E2[i+1]))
-		{				
-			data = (int)((float)Current_Vlaue * Calibration[i+1]);		
-		}
-		printf("Calibration =%f\n",Calibration[i+1]);		
+			{				
+				data = (int)((float)Current_Vlaue * Calibration[i]) - data1;		
+			}
+		printf("Calibration =%f\n",Calibration[i]);		
 	}
 	TxMessage.Data[4] = (data & 0xff00)>>8;
 	TxMessage.Data[5] = data & 0xff;	

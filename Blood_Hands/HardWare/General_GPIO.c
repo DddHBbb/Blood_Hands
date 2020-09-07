@@ -23,7 +23,7 @@ static void All_GPIO_CONFIG(void)
 	GPIO_SetBits(GPIOB,GPIO_Pin_11);
 	GPIO_SetBits(GPIOB,GPIO_Pin_10);
 }
-
+/* ×óÓÒ¸ì²²ÅÐ¶Ï*/
 int Is_LeftOrRight(void)
 {
 	if(GPIO_ReadInputDataBit(GPIOB,LeftOrRight_Pin) == Blood_RIGHT)
@@ -35,6 +35,7 @@ int Is_LeftOrRight(void)
 		return Blood_LEFT;
 	}
 }
+/* Âö²«Ìø¶¯·½Ê½*/
 void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode,uint16_t time)
 {
 	switch(mode)
