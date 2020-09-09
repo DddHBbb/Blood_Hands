@@ -12,6 +12,7 @@
 .\objects\stm32f10x_gpio.o: D:\Deuce\MDK5\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc\stm32f10x_adc.h
 .\objects\stm32f10x_gpio.o: D:\Deuce\MDK5\Keil\STM32F1xx_DFP\2.3.0\Device\Include\stm32f10x.h
 .\objects\stm32f10x_gpio.o: D:\Deuce\MDK5\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc\stm32f10x_can.h
+.\objects\stm32f10x_gpio.o: D:\Deuce\MDK5\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc\stm32f10x_dma.h
 .\objects\stm32f10x_gpio.o: D:\Deuce\MDK5\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc\stm32f10x_gpio.h
 .\objects\stm32f10x_gpio.o: D:\Deuce\MDK5\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc\stm32f10x_rcc.h
 .\objects\stm32f10x_gpio.o: D:\Deuce\MDK5\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h

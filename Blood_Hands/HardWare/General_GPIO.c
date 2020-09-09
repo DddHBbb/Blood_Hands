@@ -6,7 +6,7 @@ static void All_GPIO_CONFIG(void)
 	
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOA, ENABLE);	
 
 	GPIO_InitStructure.GPIO_Pin = LeftOrRight_Pin ;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;  
@@ -19,6 +19,14 @@ static void All_GPIO_CONFIG(void)
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 ;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 ;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;  
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 ;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;  
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
 	GPIO_SetBits(GPIOB,GPIO_Pin_11);
 	GPIO_SetBits(GPIOB,GPIO_Pin_10);
@@ -41,27 +49,45 @@ void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode,uint16_
 	switch(mode)
 	{
 		case 0x02:
-							GPIOx->BSRR = GPIO_Pin;
-							rt_thread_delay(time/10);
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(time);
+							rt_thread_delay(time*1);
+							GPIOx->BSRR = GPIO_Pin;
 							break;
 		case 0x03:
-							GPIOx->BSRR = GPIO_Pin;
-							rt_thread_delay(time);
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(time/10);	
+							rt_thread_delay(time/40);
+							GPIOx->BSRR = GPIO_Pin;		
 							break;
 		case 0x01:
-							GPIOx->BSRR = GPIO_Pin;
-							rt_thread_delay(time);
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(time);	
+							rt_thread_delay(time/10);	
+							GPIOx->BSRR = GPIO_Pin;
 							break;
 		case 0x00:						
 							GPIOx->BSRR = GPIO_Pin;
 							break;		
 	}
+}
+uint8_t Position_Check(void)
+{
+	if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5) == 1) && (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6) == 1))
+		{
+			return 0x01; //正常
+		}
+	if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5) == 1) && (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6) == 0))
+		{
+			return 0x02;//偏上
+		}
+	if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5) == 0) && (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6) == 1))
+		{
+			return 0x03;//偏下
+		}
+	if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5) == 0) && (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6) == 0))
+		{
+			return 0x00;//未检测
+		}
+
+	
 }
 void All_GPIO_init(void)
 {

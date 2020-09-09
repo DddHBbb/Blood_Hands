@@ -7,7 +7,7 @@
 
 
 /***********************声明返回区*******************************/
-extern uint16_t ADC_ConvertedValue;
+
 extern CanRxMsg RxMessage;	
 
 /***********************全局变量区*******************************/
@@ -24,19 +24,13 @@ void CAN_RX_IRQHandler(void)
 		{
 			CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
 		}
-		rt_kprintf("laile =0x%x\n",RxMessage.StdId);		
+//			for(int i=0;i<8;i++)	
+//		{
+//				printf("RxMessage = 0x%x\n",RxMessage.Data[i]);				
+//		}
+//		rt_kprintf("laile =0x%x\n",RxMessage.StdId);		
 		CAN_ClearITPendingBit(CAN1,CAN_IT_FMP0);
 		rt_interrupt_leave();
-}
-void ADC_IRQHandler(void)
-{	
-	rt_interrupt_enter();
-	if (ADC_GetITStatus(ADCx,ADC_IT_EOC)!= RESET ) 
-	{
-		ADC_ConvertedValue = ADC_GetConversionValue(ADCx);
-	}
-	ADC_ClearITPendingBit(ADCx,ADC_IT_EOC);
-	rt_interrupt_leave();
 }
 
 

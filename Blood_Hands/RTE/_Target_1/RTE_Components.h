@@ -20,6 +20,8 @@
 #define RTE_DEVICE_STDPERIPH_ADC
 /*  Keil::Device:StdPeriph Drivers:CAN:3.5.0 */
 #define RTE_DEVICE_STDPERIPH_CAN
+/*  Keil::Device:StdPeriph Drivers:DMA:3.5.0 */
+#define RTE_DEVICE_STDPERIPH_DMA
 /*  Keil::Device:StdPeriph Drivers:Framework:3.5.1 */
 #define RTE_DEVICE_STDPERIPH_FRAMEWORK
 /*  Keil::Device:StdPeriph Drivers:GPIO:3.5.0 */

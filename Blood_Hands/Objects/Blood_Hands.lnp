@@ -15,6 +15,7 @@
 ".\objects\misc.o"
 ".\objects\stm32f10x_adc.o"
 ".\objects\stm32f10x_can.o"
+".\objects\stm32f10x_dma.o"
 ".\objects\stm32f10x_gpio.o"
 ".\objects\stm32f10x_rcc.o"
 ".\objects\stm32f10x_usart.o"

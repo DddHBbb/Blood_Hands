@@ -16,6 +16,7 @@
 int Is_LeftOrRight(void);
 void All_GPIO_init(void);
 void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode,uint16_t time);
+uint8_t Position_Check(void);
 #endif
 
 
