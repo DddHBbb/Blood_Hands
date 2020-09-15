@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD, USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\HardWare\adc;.\HardWare\i2c;.\HardWare;..\Blood_Hands</IncludePath>
+              <IncludePath>.\HardWare\adc;.\HardWare\i2c;.\HardWare;..\Blood_Hands;.\HardWare\iwdg</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

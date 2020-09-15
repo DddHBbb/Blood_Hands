@@ -27,7 +27,7 @@ void Dispose_Task(void* parameter)
 	while(1)
 	{
 		  General_Dispose();	
-		  rt_thread_delay(10);
+		  rt_thread_delay(100);
 	}
 }
  /****************************************
@@ -88,7 +88,7 @@ void Task_init(void)
                       CAN_Task,   				 /* 线程入口函数 */
                       RT_NULL,             /* 线程入口函数参数 */
                       512,                 /* 线程栈大小 */
-                      3,                   /* 线程的优先级 */
+                      0,                   /* 线程的优先级 */
                       20);                 /* 线程时间片 */
                    
     /* 启动线程，开启调度 */
@@ -108,7 +108,7 @@ void Task_init(void)
                       ADC_Task,  					 /* 线程入口函数 */
                       RT_NULL,             /* 线程入口函数参数 */
                       512,                 /* 线程栈大小 */
-                      1,                   /* 线程的优先级 */
+                      2,                   /* 线程的优先级 */
                       20);                 /* 线程时间片 */
                    
     /* 启动线程，开启调度 */
@@ -122,5 +122,5 @@ void Task_init(void)
                       20);                 /* 线程时间片 */
                    
     /* 启动线程，开启调度 */
-   if (DISPOSE_Handle != RT_NULL)    rt_thread_startup(DISPOSE_Handle);
+ //  if (DISPOSE_Handle != RT_NULL)    rt_thread_startup(DISPOSE_Handle);
 }

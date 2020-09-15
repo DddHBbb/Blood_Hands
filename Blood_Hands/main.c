@@ -25,7 +25,9 @@ int main(void)
 void Application(void* parameter)
 {
 		Timer_init();//软件定时器初始化函数
+		mx_box_init();
 	  Task_init();//创建任务初始化函数
-	  Semaphore_init();//信号量初始化函数
+	  Semaphore_init();//信号量初始化函数	
 		rt_thread_delete(App_Handle);//删除入口函数 
+	
 }

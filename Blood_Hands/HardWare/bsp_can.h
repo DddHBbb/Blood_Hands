@@ -5,9 +5,9 @@
 #include "bsp_usart.h"
 
 
-#define CANx                       	CAN1
-#define CAN_CLK                    RCC_APB1Periph_CAN1
-#define CAN_RX_IRQ									USB_LP_CAN1_RX0_IRQn
+#define CANx                      CAN1
+#define CAN_CLK                   RCC_APB1Periph_CAN1
+#define CAN_RX_IRQ								USB_LP_CAN1_RX0_IRQn
 #define CAN_RX_IRQHandler					USB_LP_CAN1_RX0_IRQHandler
 
 #define CAN_RX_PIN                GPIO_Pin_11

@@ -11,11 +11,10 @@
 #define PULSE_PORT  		 GPIOB
 #define GONG_PLUSE_PIN   GPIO_Pin_10
 #define NAO_PLUSE_PIN    GPIO_Pin_11
-#define DELAY_TIES       10000
 
 int Is_LeftOrRight(void);
 void All_GPIO_init(void);
-void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode,uint16_t time);
+void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode);
 uint8_t Position_Check(void);
 #endif
 

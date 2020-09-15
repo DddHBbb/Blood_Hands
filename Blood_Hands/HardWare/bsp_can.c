@@ -39,7 +39,7 @@ static void CAN_NVIC_Config(void)
 {
    	NVIC_InitTypeDef NVIC_InitStructure;
 		/* Configure one bit for preemption priority */
-		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	 	/*中断设置*/
 		NVIC_InitStructure.NVIC_IRQChannel = CAN_RX_IRQ;	   //CAN1 RX0中断
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;		   //抢占优先级0

@@ -36,6 +36,7 @@ void CAN_Task(void* parameter);
 void I2C_Task(void* parameter);
 void ADC_Task(void* parameter);
 void Semaphore_init(void);
+void mx_box_init(void);
 void Dispose_Task(void* parameter);
 
 #endif /* __BOARD_H__ */

@@ -3,26 +3,25 @@
 
 /***********************函数声明区*******************************/
 void Inquire_Pressure(void);
-void Pulse_BounceIndex(void);
-void Pulse_Bounce_OneShot(void);
-void Blood_Pressure_Calibration(void);
+void Pulse_BounceIndex(uint8_t *data,uint8_t *Gong,uint8_t *Nao);
+void Pulse_Bounce_OneShot(uint8_t *Gong,uint8_t *Nao);
+void Blood_Pressure_Calibration(uint8_t *data);
 void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao);
 int Average_ADC(uint8_t Flag);
 /***********************声明返回区*******************************/
+//extern rt_event_t Blood_Pressure_Calibration_Event;
 
-extern CanRxMsg RxMessage;	
 extern CanTxMsg TxMessage;	
-extern rt_event_t Blood_Pressure_Calibration_Event;
 extern __IO uint16_t ADC_ConvertedValue;
+extern rt_mailbox_t mx_can_Handle;
 /***********************全局变量区*******************************/
-uint8_t Gong_Pulse_Status=0xff;
-uint8_t Nao_Pulse_Status=0xff;
+int Value_mmHg[7]={0};
 int Save_ADC_To_E2[7];
 int Read_ADC_From_E2[8]={0};
 float Calibration[7];
-int Value_mmHg[7]={0};
+
 uint8_t Read_From_E2_Flag=0;						//确保只读取一次校准值，只有在更新校准之后才可读取，开机除外
-uint8_t Switch_Flag=0; 									//防止 tick 和 正常动脉  跳动冲突 
+
 
 const int  _0_mmHg   = 0;
 const int  _50_mmHg  = 50;
@@ -41,10 +40,7 @@ const int  _300_mmHg = 300;
   ***************************************/
 void General_Dispose(void)
 {
-	if(Switch_Flag == 1)
-	{
-	//	Pulse_Bounce_Dispose(Gong_Pulse_Status,Nao_Pulse_Status);//肱动脉处理
-	}
+
 }
  /****************************************
   * @brief  CAN接收处理函数
@@ -53,24 +49,27 @@ void General_Dispose(void)
   ***************************************/
 void CAN_Task_Dispose(void)
 {	
-		switch(RxMessage.Data[0])
-		{
-			case 0xc1:
-								Inquire_Pressure();
-								break;
-			case 0xc2:
-								Pulse_BounceIndex();
-								break;
-			case 0xc3:
-								Pulse_Bounce_OneShot();
-								break;
-			case 0xc4:
-								Blood_Pressure_Calibration();
-								break;
-			default:	RxMessage.Data[0] = 0;
-								break;				
-		}	
-		RxMessage.Data[0] = 0;
+	static uint8_t Gong_Pulse_Status=0xff;
+	static uint8_t Nao_Pulse_Status=0xff;
+	static uint8_t *CAN_Data=RT_NULL;
+	
+	rt_mb_recv(mx_can_Handle,(rt_uint32_t *)&CAN_Data,RT_WAITING_FOREVER);	
+	switch(CAN_Data[0])
+	{
+		case 0xc1:
+							Inquire_Pressure();
+							break;
+		case 0xc2:
+							Pulse_BounceIndex(CAN_Data,&Gong_Pulse_Status,&Nao_Pulse_Status);
+							break;
+		case 0xc3:
+							Pulse_Bounce_OneShot(&Gong_Pulse_Status,&Nao_Pulse_Status);
+							break;
+		case 0xc4:
+							Blood_Pressure_Calibration(CAN_Data);
+							break;
+		default:	CAN_Data[0] = 0;			
+	}	
 }		
  /****************************************
   * @brief  压力查询处理函数
@@ -90,133 +89,105 @@ void Inquire_Pressure(void)
   * @param  无
   * @retval 无
   ***************************************/
-void Pulse_BounceIndex(void)
+void Pulse_BounceIndex(uint8_t *data,uint8_t *Gong,uint8_t *Nao)
 {
-	switch(RxMessage.Data[1])
+	switch(data[1])
 	{
 		case 0x00:
-							Gong_Pulse_Status = GONG_DISAPPEAR;
-							break;
+		{
+						*Gong = GONG_DISAPPEAR;
+						break;
+		}
 		case 0x01:
-							Gong_Pulse_Status = GONG_NORMAL;
-							break;
+		{
+						*Gong = GONG_NORMAL;
+						break;
+		}
 		case 0x02:
-							Gong_Pulse_Status = GONG_UP;
-							break;
+		{
+						*Gong = GONG_UP;
+						break;
+		}
 		case 0x03:
-							Gong_Pulse_Status = GONG_DOWN;
-							break;
-		default:	Gong_Pulse_Status = 0xff;
-							break;	
+		{
+						*Gong = GONG_DOWN;
+						break;
+		}
+		default:	*Gong = 0x00;	
 	}
-	switch(RxMessage.Data[2])
+	
+	switch(data[2])
 	{
 		case 0x00:
-							Nao_Pulse_Status = NAO_DISAPPEAR;
-							break;
+		{
+						*Nao = NAO_DISAPPEAR;
+						break;
+		}
 		case 0x01:
-							Nao_Pulse_Status = NAO_NORMAL;
-							break;
+		{
+						*Nao = NAO_NORMAL;
+						break;
+		}
 		case 0x02:
-							Nao_Pulse_Status = NAO_UP;
-							break;
+		{
+						*Nao = NAO_UP;
+						break;
+		}
 		case 0x03:
-							Nao_Pulse_Status = NAO_DOWN;
-							break;
-		default:	Nao_Pulse_Status = 0xff;
-						  break;
+		{
+						*Nao = NAO_DOWN;
+						break;
+		}
+		default:	*Nao = 0x00;
 	}
 }
-// /****************************************
-//  * @brief  脉搏跳动处理函数，0x00脉搏消失，0x01脉搏正常，0x02脉搏增强，0x03脉搏减弱
-//  * @param  无
-//  * @retval 无
-//  ***************************************/
-//void Pulse_Bounce_Dispose(uint8_t Current_Status_Gong,uint8_t Current_Status_Nao)
-//{
-//	switch(Current_Status_Gong)
-//	{
-//		case GONG_DISAPPEAR:
-//											//肱脉搏消失
-//											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_DISAPPEAR,DELAY_TIES);
-//											break;
-//		case GONG_NORMAL:
-//											//肱脉搏正常
-//											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_NORMAL,DELAY_TIES);										
-//											break;
-//		case GONG_UP:
-//											//肱脉搏增强
-//											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_UP,DELAY_TIES);
-//											break;
-//		case GONG_DOWN:
-//											//肱脉搏减弱
-//											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_DOWN,DELAY_TIES);
-//											break;
-//	}
-//	switch(Current_Status_Nao)
-//	{
-//		case NAO_DISAPPEAR:
-//											//挠脉搏消失
-//											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_DISAPPEAR,DELAY_TIES);
-//											break;
-//		case NAO_NORMAL:
-//											//挠脉搏正常
-//											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_NORMAL,DELAY_TIES);	
-//											break;
-//		case NAO_UP:
-//											//挠脉搏增强
-//											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_UP,DELAY_TIES);
-//											break;
-//		case NAO_DOWN:
-//											//挠脉搏减弱
-//											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_DOWN,DELAY_TIES);
-//											break;
-//	}
-//}
  /****************************************
   * @brief  单次脉搏跳动，接受一次跳一次
+						脉搏跳动处理函数，0x00脉搏消失，0x01脉搏正常，0x02脉搏增强，0x03脉搏减弱
   * @param  无
   * @retval 无
   ****************************************/
-void Pulse_Bounce_OneShot(void)
+void Pulse_Bounce_OneShot(uint8_t *Gong,uint8_t *Nao)
 {
-	switch(Gong_Pulse_Status)
+	switch(*Gong)
 	{
 		case GONG_DISAPPEAR:
 											//肱脉搏消失
-											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_DISAPPEAR,DELAY_TIES);
+											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_DISAPPEAR);
 											break;
 		case GONG_NORMAL:
 											//肱脉搏正常
-											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_NORMAL,DELAY_TIES);										
+											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_NORMAL);										
 											break;
 		case GONG_UP:
 											//肱脉搏增强
-											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_UP,DELAY_TIES);
+											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_UP);
 											break;
 		case GONG_DOWN:
 											//肱脉搏减弱
-											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_DOWN,DELAY_TIES);
+											Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_DOWN);
 											break;
+		default : 				Pulse_Bounce_IO(PULSE_PORT,GONG_PLUSE_PIN,GONG_DISAPPEAR);
 	}
-	switch(Nao_Pulse_Status)
+	switch(*Nao)
 	{
 		case NAO_DISAPPEAR:
 											//挠脉搏消失
-											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_DISAPPEAR,DELAY_TIES);
+											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_DISAPPEAR);
 											break;
 		case NAO_NORMAL:
 											//挠脉搏正常
-											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_NORMAL,DELAY_TIES);	
+											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_NORMAL);	
 											break;
 		case NAO_UP:
 											//挠脉搏增强
-											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_UP,DELAY_TIES);
+											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_UP);
 											break;
 		case NAO_DOWN:
 											//挠脉搏减弱
-											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_DOWN,DELAY_TIES);
+											Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_DOWN);
 											break;
+		default : 				Pulse_Bounce_IO(PULSE_PORT,NAO_PLUSE_PIN,NAO_DISAPPEAR);
 	}
 }
  /****************************************
@@ -224,10 +195,10 @@ void Pulse_Bounce_OneShot(void)
   * @param  无
   * @retval 无
   ****************************************/
-void Blood_Pressure_Calibration(void)
+void Blood_Pressure_Calibration(uint8_t *data)
 {
 	ADC_Cmd(ADCx, ENABLE);	
-	switch(RxMessage.Data[1])
+	switch(data[1])
 	{
 		case Zero_mmhg:																	
 									//0mmhg										
@@ -235,14 +206,14 @@ void Blood_Pressure_Calibration(void)
 									Save_ADC_To_E2[0]	= Average_ADC(0);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[0],0,2);
 									TxMessage.Data[2] = Zero_mmhg;
-									rt_kprintf("Zero_mmhgn\n");
+//									rt_kprintf("Zero_mmhgn\n");
 									break;
 		case Fifty_mmhg:
 									//50mmhg
 									ee_WriteBytes((uint8_t *)&_50_mmHg,0x14+2,2);			
 									Save_ADC_To_E2[1]	= Average_ADC(0);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[1],2,2);
-									rt_kprintf("Fifty_mmhg\n");
+//									rt_kprintf("Fifty_mmhg\n");
 									TxMessage.Data[2] = Fifty_mmhg;
 									break;
 		case One_Hundred_mmhg:
@@ -250,7 +221,7 @@ void Blood_Pressure_Calibration(void)
 									ee_WriteBytes((uint8_t *)&_100_mmHg,0x14+2*2,2);		
 									Save_ADC_To_E2[2]	= Average_ADC(0);
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[2],2*2,2);
-									rt_kprintf("One_Hundred_mmhg\n");
+//									rt_kprintf("One_Hundred_mmhg\n");
 									TxMessage.Data[2] = One_Hundred_mmhg;
 									break;
 		case One_Hundred_Fifty_mmhg:
@@ -258,7 +229,7 @@ void Blood_Pressure_Calibration(void)
 									ee_WriteBytes((uint8_t *)&_150_mmHg,0x14+2*3,2);	
 									Save_ADC_To_E2[3]	= Average_ADC(0);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[3],2*3,2);
-									rt_kprintf("One_Hundred_Fifty_mmhg\n");
+//									rt_kprintf("One_Hundred_Fifty_mmhg\n");
 									TxMessage.Data[2] = One_Hundred_Fifty_mmhg;
 									break;
 		case Two_Hundred_mmhg:
@@ -336,7 +307,7 @@ void ADC_DataToSend(void)
 							data = (int)((float)(Current_Vlaue - Read_ADC_From_E2[i]) / Calibration[i]) + Value_mmHg[i];
 						}						
 				}
-			printf("Calibration =%f\t Read_ADC_From_E2 = %d\n",Calibration[i],Read_ADC_From_E2[i]);		
+//			printf("Calibration =%f\t Read_ADC_From_E2 = %d\n",Calibration[i],Read_ADC_From_E2[i]);		
 		}
 		TxMessage.Data[4] = (data & 0xff00)>>8;
 		TxMessage.Data[5] = data & 0xff;	
@@ -347,9 +318,9 @@ void ADC_DataToSend(void)
 	}
 	CAN_SetMsg(0x71,&TxMessage);
 	CAN_Transmit(CAN1,&TxMessage);
-	rt_kprintf("current =%d\n",Current_Vlaue);
-	rt_kprintf("positon =0x%x\n",Position_Check());
-	rt_kprintf("data =%d\n",data);
+//	rt_kprintf("current =%d\n",Current_Vlaue);
+//	rt_kprintf("positon =0x%x\n",Position_Check());
+//	rt_kprintf("data =%d\n",data);
 }
  /****************************************
 	* @brief  ADC发送已经处理过的数据

@@ -44,30 +44,33 @@ int Is_LeftOrRight(void)
 	}
 }
 /* Âö²«Ìø¶¯·½Ê½*/
-void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode,uint16_t time)
+void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode)
 {
 	switch(mode)
 	{
 		case 0x02:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(time*1);
+							rt_thread_delay(1800); //180ms
 							GPIOx->BSRR = GPIO_Pin;
 							break;
 		case 0x03:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(time/40);
+							rt_thread_delay(600);//60ms
 							GPIOx->BSRR = GPIO_Pin;		
 							break;
 		case 0x01:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(time/10);	
+							rt_thread_delay(1200);	//120ms
 							GPIOx->BSRR = GPIO_Pin;
 							break;
 		case 0x00:						
 							GPIOx->BSRR = GPIO_Pin;
 							break;		
+		default : GPIOx->BSRR = GPIO_Pin;
+							
 	}
 }
+/* Ðä´øÎ»ÖÃ¼ì²â*/
 uint8_t Position_Check(void)
 {
 	if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5) == 1) && (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6) == 1))
@@ -87,9 +90,38 @@ uint8_t Position_Check(void)
 			return 0x00;//Î´¼ì²â
 		}
 
-	
+	return 0;
 }
 void All_GPIO_init(void)
 {
 		All_GPIO_CONFIG();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
