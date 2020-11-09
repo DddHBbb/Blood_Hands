@@ -12,7 +12,7 @@ int Average_ADC(uint8_t Flag);
 //extern rt_event_t Blood_Pressure_Calibration_Event;
 
 extern CanTxMsg TxMessage;	
-extern __IO uint16_t ADC_ConvertedValue;
+extern __IO uint16_t ADC_ConvertedValue[3];
 extern rt_mailbox_t mx_can_Handle;
 /***********************全局变量区*******************************/
 int Value_mmHg[7]={0};
@@ -294,6 +294,7 @@ void ADC_DataToSend(void)
 	TxMessage.Data[1] = 0xaa;//ID  瞎编的
 	TxMessage.Data[2] = Is_LeftOrRight();//左胳膊还是右胳膊
 	TxMessage.Data[3] = Position_Check();//袖带位置
+	rt_kprintf("Position_Check =%d\n",Position_Check());
 	if(Position_Check() == 0x01)
 	{
 	/* 开始校准数据*/
@@ -318,9 +319,9 @@ void ADC_DataToSend(void)
 	}
 	CAN_SetMsg(0x71,&TxMessage);
 	CAN_Transmit(CAN1,&TxMessage);
-//	rt_kprintf("current =%d\n",Current_Vlaue);
+	rt_kprintf("current =%d\n",Current_Vlaue);
 //	rt_kprintf("positon =0x%x\n",Position_Check());
-//	rt_kprintf("data =%d\n",data);
+	rt_kprintf("data =%d\n",data);
 }
  /****************************************
 	* @brief  ADC发送已经处理过的数据
@@ -347,7 +348,7 @@ int Average_ADC(uint8_t Flag)
 	
 	for (count=0;count<N;count++)
 	{
-					value_buf[count] = ADC_ConvertedValue;  
+					value_buf[count] = (int)ADC_ConvertedValue[0];  
 					rt_thread_delay(1);//这样是为了切出for，使得DMA实时值可以传进来
 	}
 	

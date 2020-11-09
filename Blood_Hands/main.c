@@ -28,6 +28,7 @@ void Application(void* parameter)
 		mx_box_init();
 	  Task_init();//创建任务初始化函数
 	  Semaphore_init();//信号量初始化函数	
+		IWDG_Config();
 		rt_thread_delete(App_Handle);//删除入口函数 
 	
 }

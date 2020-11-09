@@ -38,5 +38,6 @@ void ADC_Task(void* parameter);
 void Semaphore_init(void);
 void mx_box_init(void);
 void Dispose_Task(void* parameter);
-
+void IWDG_Config(void);
+void IWDG_Feed(void);
 #endif /* __BOARD_H__ */

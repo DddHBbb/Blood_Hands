@@ -11,7 +11,7 @@ extern rt_sem_t Blood_Pressure_Calibration_Sem;
 static rt_thread_t CAN_Handle = RT_NULL;
 static rt_thread_t I2C_Handle = RT_NULL;
 static rt_thread_t ADC_Handle = RT_NULL;
-static rt_thread_t DISPOSE_Handle = RT_NULL;
+static rt_thread_t WTDG_Handle = RT_NULL;
 
 CanTxMsg TxMessage;
 CanRxMsg RxMessage;		
@@ -22,12 +22,12 @@ CanRxMsg RxMessage;
   * @param  无
   * @retval 无
   ***************************************/
-void Dispose_Task(void* parameter)
+void WTDG_Task(void* parameter)
 {
 	while(1)
 	{
-		  General_Dispose();	
-		  rt_thread_delay(100);
+		  IWDG_Feed();	
+		  rt_thread_delay(200);
 	}
 }
  /****************************************
@@ -114,13 +114,13 @@ void Task_init(void)
     /* 启动线程，开启调度 */
    if (ADC_Handle != RT_NULL)    rt_thread_startup(ADC_Handle);
  
-	DISPOSE_Handle = rt_thread_create( "Dispose_Task",              /* 线程名字 */
-                      Dispose_Task,   		 /* 线程入口函数 */
+	WTDG_Handle = rt_thread_create( "WTDG_Task",              /* 线程名字 */
+                      WTDG_Task,   		 /* 线程入口函数 */
                       RT_NULL,             /* 线程入口函数参数 */
                       512,                 /* 线程栈大小 */
                       2,                   /* 线程的优先级 */
                       20);                 /* 线程时间片 */
                    
     /* 启动线程，开启调度 */
- //  if (DISPOSE_Handle != RT_NULL)    rt_thread_startup(DISPOSE_Handle);
+   if (WTDG_Handle != RT_NULL)    rt_thread_startup(WTDG_Handle);
 }
