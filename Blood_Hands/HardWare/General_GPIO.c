@@ -74,21 +74,21 @@ void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode)
 /* 袖带位置检测*/
 uint8_t Position_Check(void)
 {
-//	printf("ADC_ConvertedValue[1]=%f\t,ADC_ConvertedValue[2]=%f\n",(ADC_ConvertedValue[1]/4096.0)*3.3,(ADC_ConvertedValue[2]/4096.0)*3.3);
-//	printf("ADC_ConvertedValue[1]11=%d\t,ADC_ConvertedValue[2]22=%d\n",ADC_ConvertedValue[1],ADC_ConvertedValue[2]);
-	if((ADC_ConvertedValue[1]/4096.0)*3.3>1.8 && (ADC_ConvertedValue[2]/4096)*3.3>1.8)
+	printf("ADC_ConvertedValue[1]=%f\t,ADC_ConvertedValue[2]=%f\n",(ADC_ConvertedValue[1]/4096.0)*3.3,(ADC_ConvertedValue[2]/4096.0)*3.3);
+	printf("ADC_ConvertedValue[1]11=%d\t,ADC_ConvertedValue[2]22=%d\n",ADC_ConvertedValue[1],ADC_ConvertedValue[2]);
+	if((ADC_ConvertedValue[1]/4096.0)*3.3>0.8 && (ADC_ConvertedValue[2]/4096.0)*3.3>1.8)
 		{
 			return 0x01; //正常
 		}
-	else if((ADC_ConvertedValue[1]/4096.0)*3.3>1.8 && (ADC_ConvertedValue[2]/4096)*3.3<1.8)
+	else if((ADC_ConvertedValue[1]/4096.0)*3.3>0.8 && (ADC_ConvertedValue[2]/4096.0)*3.3<1.8)
 		{
 			return 0x02;//偏上
 		}
-	else if((ADC_ConvertedValue[1]/4096.0)*3.3<1.8 && (ADC_ConvertedValue[2]/4096)*3.3>1.8)
+	else if((ADC_ConvertedValue[1]/4096.0)*3.3<0.8 && (ADC_ConvertedValue[2]/4096.0)*3.3>1.8)
 		{
 			return 0x03;//偏下
 		}
-	else if((ADC_ConvertedValue[1]/4096.0)*3.3 <1.8 && (ADC_ConvertedValue[2]/4096)*3.3<1.8)
+	else if((ADC_ConvertedValue[1]/4096.0)*3.3 <0.8 && (ADC_ConvertedValue[2]/4096.0)*3.3<1.8)
 		{
 			return 0x00;//未佩戴
 		}
