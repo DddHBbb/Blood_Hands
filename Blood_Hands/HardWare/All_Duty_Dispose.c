@@ -206,14 +206,14 @@ void Blood_Pressure_Calibration(uint8_t *data)
 									Save_ADC_To_E2[0]	= Average_ADC(0);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[0],0,2);
 									TxMessage.Data[2] = Zero_mmhg;
-//									rt_kprintf("Zero_mmhgn\n");
+									rt_kprintf("Zero_mmhgn\n");
 									break;
 		case Fifty_mmhg:
 									//50mmhg
 									ee_WriteBytes((uint8_t *)&_50_mmHg,0x14+2,2);			
 									Save_ADC_To_E2[1]	= Average_ADC(0);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[1],2,2);
-//									rt_kprintf("Fifty_mmhg\n");
+									rt_kprintf("Fifty_mmhg\n");
 									TxMessage.Data[2] = Fifty_mmhg;
 									break;
 		case One_Hundred_mmhg:
@@ -221,7 +221,7 @@ void Blood_Pressure_Calibration(uint8_t *data)
 									ee_WriteBytes((uint8_t *)&_100_mmHg,0x14+2*2,2);		
 									Save_ADC_To_E2[2]	= Average_ADC(0);
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[2],2*2,2);
-//									rt_kprintf("One_Hundred_mmhg\n");
+									rt_kprintf("One_Hundred_mmhg\n");
 									TxMessage.Data[2] = One_Hundred_mmhg;
 									break;
 		case One_Hundred_Fifty_mmhg:
@@ -229,7 +229,7 @@ void Blood_Pressure_Calibration(uint8_t *data)
 									ee_WriteBytes((uint8_t *)&_150_mmHg,0x14+2*3,2);	
 									Save_ADC_To_E2[3]	= Average_ADC(0);	
 									ee_WriteBytes((uint8_t *)&Save_ADC_To_E2[3],2*3,2);
-//									rt_kprintf("One_Hundred_Fifty_mmhg\n");
+									rt_kprintf("One_Hundred_Fifty_mmhg\n");
 									TxMessage.Data[2] = One_Hundred_Fifty_mmhg;
 									break;
 		case Two_Hundred_mmhg:
@@ -308,7 +308,7 @@ void ADC_DataToSend(void)
 							data = (int)((float)(Current_Vlaue - Read_ADC_From_E2[i]) / Calibration[i]) + Value_mmHg[i];
 						}						
 				}
-//			printf("Calibration =%f\t Read_ADC_From_E2 = %d\n",Calibration[i],Read_ADC_From_E2[i]);		
+			printf("Calibration =%f\t Read_ADC_From_E2 = %d\n",Calibration[i],Read_ADC_From_E2[i]);		
 		}
 		TxMessage.Data[4] = (data & 0xff00)>>8;
 		TxMessage.Data[5] = data & 0xff;	
@@ -322,6 +322,7 @@ void ADC_DataToSend(void)
 	rt_kprintf("current =%d\n",Current_Vlaue);
 //	rt_kprintf("positon =0x%x\n",Position_Check());
 	rt_kprintf("data =%d\n",data);
+		rt_thread_delay(10000);
 }
  /****************************************
 	* @brief  ADC发送已经处理过的数据

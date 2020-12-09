@@ -51,17 +51,17 @@ void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode)
 	{
 		case 0x02:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(1800); //180ms
+							rt_thread_delay(300); //30ms 
 							GPIOx->BSRR = GPIO_Pin;
 							break;
 		case 0x03:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(600);//60ms
+							rt_thread_delay(100);//10ms
 							GPIOx->BSRR = GPIO_Pin;		
 							break;
 		case 0x01:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(1200);	//120ms
+							rt_thread_delay(200);	//20ms
 							GPIOx->BSRR = GPIO_Pin;
 							break;
 		case 0x00:						
@@ -74,8 +74,8 @@ void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode)
 /* 袖带位置检测*/
 uint8_t Position_Check(void)
 {
-	printf("ADC_ConvertedValue[1]=%f\t,ADC_ConvertedValue[2]=%f\n",(ADC_ConvertedValue[1]/4096.0)*3.3,(ADC_ConvertedValue[2]/4096.0)*3.3);
-	printf("ADC_ConvertedValue[1]11=%d\t,ADC_ConvertedValue[2]22=%d\n",ADC_ConvertedValue[1],ADC_ConvertedValue[2]);
+//	printf("ADC_ConvertedValue[1]=%f\t,ADC_ConvertedValue[2]=%f\n",(ADC_ConvertedValue[1]/4096.0)*3.3,(ADC_ConvertedValue[2]/4096.0)*3.3);
+//	printf("ADC_ConvertedValue[1]11=%d\t,ADC_ConvertedValue[2]22=%d\n",ADC_ConvertedValue[1],ADC_ConvertedValue[2]);
 	if((ADC_ConvertedValue[1]/4096.0)*3.3>0.8 && (ADC_ConvertedValue[2]/4096.0)*3.3>1.8)
 		{
 			return 0x01; //正常
