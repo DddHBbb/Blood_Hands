@@ -51,17 +51,17 @@ void Pulse_Bounce_IO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin,uint8_t mode)
 	{
 		case 0x02:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(300); //30ms 
+							rt_thread_delay(600); //60ms 
 							GPIOx->BSRR = GPIO_Pin;
 							break;
 		case 0x03:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(100);//10ms
+							rt_thread_delay(200);//20ms
 							GPIOx->BSRR = GPIO_Pin;		
 							break;
 		case 0x01:
 							GPIOx->BRR = GPIO_Pin;
-							rt_thread_delay(200);	//20ms
+							rt_thread_delay(400);	//40ms
 							GPIOx->BSRR = GPIO_Pin;
 							break;
 		case 0x00:						
